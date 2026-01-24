@@ -9,13 +9,22 @@ const SECRET_KEY = process.env.JWT_SECRET || 'secret_key';
 // Register
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, name } = req.body;
+        const { username, password, name, email } = req.body;
         // Always force role to be employee unless admin is created manually
         const role = 'employee';
 
-        const userExists = await User.findOne({ username });
+        if (!email || !name || !username || !password) {
+            return res.status(400).json({ error: 'All fields (Name, Email, Username, Password) are required' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        const userExists = await User.findOne({ $or: [{ username }, { email }] });
         if (userExists) {
-            return res.status(400).json({ error: 'Username already exists' });
+            return res.status(400).json({ error: 'Username or Email already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 8);
@@ -24,6 +33,7 @@ router.post('/register', async (req, res) => {
             username,
             password: hashedPassword,
             name,
+            email,
             role
         });
 

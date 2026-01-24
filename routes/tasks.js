@@ -136,9 +136,19 @@ router.post('/', verifyToken, async (req, res) => {
 router.put('/:id', verifyToken, async (req, res) => {
     try {
         const taskId = req.params.id;
-        const { status, subtasks } = req.body;
+        const { status, subtasks, title, description, due_date } = req.body;
         const userId = req.userId;
         const userRole = req.userRole;
+
+        console.log(`[DEBUG] PUT /tasks/${taskId} by ${userId}`);
+        if (subtasks) {
+            console.log('[DEBUG] Incoming subtasks:', JSON.stringify(subtasks, null, 2));
+            subtasks.forEach((st, idx) => {
+                if (st.status === 'Completed' && !st.completed_at) {
+                    console.warn(`[WARNING] Subtask ${idx} is Completed but missing completed_at!`);
+                }
+            });
+        }
 
         const task = await Task.findById(taskId);
         if (!task) return res.status(404).json({ error: 'Task not found' });
@@ -152,6 +162,10 @@ router.put('/:id', verifyToken, async (req, res) => {
         }
 
         const updateData = {};
+        if (title) updateData.title = title;
+        if (description) updateData.description = description;
+        if (due_date) updateData.due_date = due_date;
+
         if (status) {
             updateData.status = status;
             if (status === 'Completed') {
@@ -165,6 +179,7 @@ router.put('/:id', verifyToken, async (req, res) => {
         }
 
         const updatedTask = await Task.findByIdAndUpdate(taskId, updateData, { new: true });
+        console.log('[DEBUG] Updated Task Subtasks:', JSON.stringify(updatedTask.subtasks, null, 2));
 
         // Notification Logic
         if (status) {

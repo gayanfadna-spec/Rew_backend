@@ -7,12 +7,14 @@ const taskSchema = new mongoose.Schema({
     description: { type: String },
     status: { type: String, default: 'To-Do' },
     created_at: { type: Date, default: Date.now },
-    due_date: { type: Date },
+    due_date: { type: Date, required: true },
     completed_at: { type: Date },
     reminder_sent: { type: Boolean, default: false },
     subtasks: [{
         title: String,
-        status: { type: String, default: 'To-Do' } // Assuming subtasks have status
+        status: { type: String, default: 'To-Do' },
+        due_date: { type: Date },
+        completed_at: { type: Date }
     }]
 }, { timestamps: true });
 
