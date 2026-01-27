@@ -74,8 +74,8 @@ router.get('/', verifyToken, async (req, res) => {
         }
 
         const tasks = await Task.find(query)
-            .populate('sender', 'name')
-            .populate('receiver', 'name')
+            .populate('sender', 'name department')
+            .populate('receiver', 'name department')
             .sort({ created_at: -1 });
 
         // Transform response to match previous structure if needed
@@ -88,6 +88,8 @@ router.get('/', verifyToken, async (req, res) => {
             id: t._id, // Map _id to id
             sender_name: t.sender ? t.sender.name : 'Unknown',
             receiver_name: t.receiver ? t.receiver.name : 'Unknown',
+            sender_department: t.sender ? t.sender.department : 'Unknown',
+            receiver_department: t.receiver ? t.receiver.department : 'Unknown',
             sender_id: t.sender ? t.sender._id : null,
             receiver_id: t.receiver ? t.receiver._id : null
         }));
