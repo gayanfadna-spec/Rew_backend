@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'secret_key';
 // Register
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, name, email } = req.body;
+        const { username, password, name, email, department } = req.body;
         // Always force role to be employee unless admin is created manually
         const role = 'employee';
 
@@ -34,7 +34,8 @@ router.post('/register', async (req, res) => {
             password: hashedPassword,
             name,
             email,
-            role
+            role,
+            department
         });
 
         // Generate token immediately

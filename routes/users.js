@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 // Get All Users (for dropdowns or admin)
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const users = await User.find({}, 'id username name role email'); // Include email
+        const users = await User.find({}, 'id username name role email department'); // Include email and department
         // Mongoose uses _id, but frontend might expect id.
         // Let's map _id to id if necessary, or just rely on frontend handling functionality.
         // For consistent API with previous version, let's map it.
@@ -17,7 +17,8 @@ router.get('/', verifyToken, async (req, res) => {
             username: u.username,
             name: u.name,
             role: u.role,
-            email: u.email
+            email: u.email,
+            department: u.department
         }));
         res.json(response);
     } catch (err) {
@@ -42,8 +43,8 @@ router.put('/:id', verifyToken, async (req, res) => {
     }
 
     try {
-        const { name, username, email, role, password } = req.body;
-        const updateData = { name, username, email, role };
+        const { name, username, email, role, password, department } = req.body;
+        const updateData = { name, username, email, role, department };
 
         // If password is provided, hash it
         if (password && password.trim() !== '') {
@@ -58,7 +59,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 
         if (!updatedUser) return res.status(404).json({ error: 'User not found' });
 
-        res.json({ message: 'User updated successfully', user: { id: updatedUser._id, name: updatedUser.name, username: updatedUser.username, email: updatedUser.email, role: updatedUser.role } });
+        res.json({ message: 'User updated successfully', user: { id: updatedUser._id, name: updatedUser.name, username: updatedUser.username, email: updatedUser.email, role: updatedUser.role, department: updatedUser.department } });
 
     } catch (err) {
         console.error("Update User Error:", err); // Log the actual error
